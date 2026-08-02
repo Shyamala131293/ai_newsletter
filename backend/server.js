@@ -34,7 +34,7 @@ app.post('/send-email', async (req, res) => {
   try {
     await transporter.sendMail({
       from: '"AI newsletter" <ainewsletter6@gmail.com>',
-      to: recipientEmails.join(', '),
+      to: "shyamala.devi1993@gmail.com",
       subject: 'AI newsletter',
       text: 'Please find the attached newsletter.',
       attachments: [
