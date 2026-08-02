@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-export const sendEmail = async (url, { recipientEmails, pdfBase64 }) => {
+const apiUrl = "https://ai-newsletter-1-cwxb.onrender.com";
+
+export const sendEmail = async (apiUrl, { recipientEmails, pdfBase64 }) => {
   try {
-    await axios.post(url, {
+    await axios.post(apiUrl, {
       recipientEmails,
       pdfBase64,
     });
