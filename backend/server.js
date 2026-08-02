@@ -29,6 +29,7 @@ app.post('/send-email', async (req, res) => {
     tls: {
       rejectUnauthorized: false, // for testing, but not recommended for production
     },
+    connectionTimeout: 50000,
   });
 
   try {
@@ -44,6 +45,7 @@ app.post('/send-email', async (req, res) => {
           contentType: 'application/pdf',
         },
       ],
+      connectionTimeout: 50000,
     });
     res.json({ message: 'Emails sent successfully' });
   } catch (error) {
