@@ -42,7 +42,9 @@ const transporter = nodemailer.createTransport({
     res.status(500).json({ error: 'Failed to send email' });
   }
 });
-
+app.use(cors({
+  origin: ['http://localhost.com', ]
+}));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
