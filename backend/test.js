@@ -28,7 +28,7 @@ const testPort = (host, port) => {
 
 // Example usage:
 const smtpHost = 'smtp.gmail.com';
-const smtpPort = 443;
+const smtpPort = 587;
 
 testPort(smtpHost, smtpPort)
   .then(() => {
