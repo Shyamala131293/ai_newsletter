@@ -20,7 +20,6 @@ app.post('/send-email', async (req, res) => {
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
     secure: false,
     auth: {
       user: 'ainewsletter6@gmail.com',
