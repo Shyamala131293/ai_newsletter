@@ -4,7 +4,7 @@
     "description": "Backend server for sending emails with Nodemailer",
     "main": "server.js",
     "scripts": {
-      "start": " "node backend/server.js""
+      "start": "node server.js"
     },
     "dependencies": {
       "express": "^4.18.2",
