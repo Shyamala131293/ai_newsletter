@@ -182,6 +182,7 @@ const App = () => {
 
       {/* Date Range Selector */}
       <div style={{ textAlign: 'center', marginTop: '30px' }}>
+      <span style={{ marginRight: '10px', fontWeight: 'bold' }}>Select the date to view the articles</span>
         <select
           onChange={(e) => {
             const selectedLabel = e.target.value;
