@@ -1,11 +1,13 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
+const sgMail = require('@sendgrid/mail');
 
 const app = express();
-
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Set your SendGrid API Key
+sgMail.setApiKey('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');
 
 app.post('/send-email', async (req, res) => {
   const { recipientEmails, pdfBase64 } = req.body;
@@ -18,34 +20,24 @@ app.post('/send-email', async (req, res) => {
     return res.status(400).json({ error: 'recipientEmails array is required' });
   }
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    secure: false,
-    auth: {
-      user: 'ainewsletter6@gmail.com',
-      pass: 'hfaxncpwsiwzscko',
-    },
-    tls: {
-      rejectUnauthorized: false, // for testing, but not recommended for production
-    },
-    connectionTimeout: 50000,
-  });
+  // Prepare the email message
+  const msg = {
+    from: '"AI newsletter" <ainewsletter6@gmail.com>', // Your verified sender
+    to: recipientEmails, // Array of recipients
+    subject: 'AI newsletter',
+    html: '<p>Please find the attached newsletter.</p>', // You can customize the email content here
+    attachments: [
+      {
+        content: pdfBase64,
+        filename: 'newsletter.pdf',
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+    ],
+  };
 
   try {
-    await transporter.sendMail({
-      from: '"AI newsletter" <ainewsletter6@gmail.com>',
-      to: "shyamala.devi1993@gmail.com",
-      subject: 'AI newsletter',
-      text: 'Please find the attached newsletter.',
-      attachments: [
-        {
-          filename: 'newsletter.pdf',
-          content: Buffer.from(pdfBase64, 'base64'),
-          contentType: 'application/pdf',
-        },
-      ],
-      connectionTimeout: 50000,
-    });
+    await sgMail.send(msg);
     res.json({ message: 'Emails sent successfully' });
   } catch (error) {
     console.error(error);
@@ -53,14 +45,7 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
-// Correct the CORS origin array (remove the typo 'localhost.com' -> 'localhost')
-app.use(
-  cors({
-    origin: ['http://localhost'], // or specify your exact frontend URL
-  })
-);
-
-const PORT = process.env.PORT || 3000;
+const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
