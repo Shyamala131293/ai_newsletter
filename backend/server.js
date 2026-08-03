@@ -7,7 +7,8 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // Set your SendGrid API Key
-sgMail.setApiKey('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');
+//sgMail.setApiKey('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');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 app.post('/send-email', async (req, res) => {
   const { recipientEmails, pdfBase64 } = req.body;
