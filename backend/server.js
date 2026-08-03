@@ -23,7 +23,7 @@ app.post('/send-email', async (req, res) => {
 
   // Prepare the email message
   const msg = {
-    from: '"AI newsletter" <ainewsletter6@gmail.com>', // Your verified sender
+    from: 'AI newsletter <ainewsletter6@gmail.com>', // Your verified sender
     to: recipientEmails, // Array of recipients
     subject: 'AI newsletter',
     html: '<p>Please find the attached newsletter.</p>', // You can customize the email content here
