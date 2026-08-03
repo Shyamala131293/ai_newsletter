@@ -152,7 +152,7 @@ const App = () => {
       const pdfBase64 = await pdfBlobToBase64(pdfBlob);
 
       // Send email
-      await sendEmail('http://localhost:4000/send-email', {
+      await sendEmail('https://ai-newsletter-vobs.onrender.com/send-email', {
         recipientEmails: emailList,
         pdfBase64: pdfBase64,
       });
