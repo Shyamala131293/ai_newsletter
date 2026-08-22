@@ -15,3 +15,5 @@ useEffect(() => {
       console.error('Error in workflow:', error);
     });
 }, []);
+
+export default App;
