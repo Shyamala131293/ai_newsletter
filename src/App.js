@@ -35,7 +35,7 @@ const App = () => {
   setLoading(true);
   try {
     // Call your backend agent
-    const data = await agentFetchArticles(['example.com']); // pass your domains here
+    const data = await agentFetchArticles(['https://dzone.com/​']); // pass your domains here
     setArticles(data);
   } catch (err) {
     console.error('Error fetching articles:', err);
