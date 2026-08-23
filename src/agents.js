@@ -6,7 +6,7 @@ import axios from 'axios';
 const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
 
 export async function fetchArticles(start, end) {
-  const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&dateEnd=${end}`;
+const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&dateEnd=${end}`;
   const response = await axios.get(url);
   const fetchedArticles = response.data.articles.results;
 
@@ -24,6 +24,7 @@ export async function fetchArticles(start, end) {
     if (uniqueArticles.length === 10) break;
   }
   return uniqueArticles;
+
 }
 
 export async function generatePdfAndSend({ articles, recipientEmails, emailEndpoint }) {
@@ -33,7 +34,9 @@ export async function generatePdfAndSend({ articles, recipientEmails, emailEndpo
 
   const base64 = await blobToBase64(pdfBlob);
   await sendEmail(emailEndpoint, { recipientEmails, pdfBase64: base64 });
+
 }
+
 
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
@@ -42,17 +45,4 @@ function blobToBase64(blob) {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
-}
-
-// Full workflow
-export async function runFullWorkflow({ start, end, selectedArticles, allArticles, emails, emailEndpoint }) {
-  const articles = await fetchArticles(start, end);
-  const articlesToSend = (selectedArticles && selectedArticles.length > 0) ? selectedArticles : articles;
-
-  if (!articlesToSend || articlesToSend.length === 0) {
-    throw new Error('No articles to send.');
-  }
-
-  await generatePdfAndSend({ articles: articlesToSend, recipientEmails: emails, emailEndpoint });
-  return { fetchedArticles: articles, sentArticles: articlesToSend };
 }
