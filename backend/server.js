@@ -32,13 +32,13 @@ async function fetchArticles(domain) {
   }
 });
   const $ = cheerio.load(data);
+   console.log($)
   const articles = [];
 
   $('h2, a').each((i, elem) => {
     const text = $(elem).text();
     const link = $(elem).attr('href');
-    if (text && link && link.startsWith('https')) {
-      if (text.toLowerCase().includes('ai')) {
+    if (text && link && link.startsWith('http')) {
         articles.push({ title: text, url: link });
       }
     }
