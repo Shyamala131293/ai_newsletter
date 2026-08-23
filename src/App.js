@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchArticles } from './agents'; // Your fetchArticles function
+import { agentFetchArticles  } from './agents'; // Your fetchArticles function
 import { runWorkflow } from './workflow'; // Your runWorkflow function
 
 // Utility to get last 4 Fridays and today
@@ -31,17 +31,18 @@ const App = () => {
   const emailEndpoint = 'https://ai-newsletter-vobs.onrender.com/send-email';
 
   // Fetch articles for initial load or when dateRange changes
-  const fetchArticlesForRange = async (start, end) => {
-    setLoading(true);
-    try {
-      const data = await fetchArticles(start, end);
-      setArticles(data);
-    } catch (err) {
-      console.error('Error fetching articles:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchArticlesForRange = async (start, end) => {
+  setLoading(true);
+  try {
+    // Call your backend agent
+    const data = await agentFetchArticles(['example.com']); // pass your domains here
+    setArticles(data);
+  } catch (err) {
+    console.error('Error fetching articles:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // When dateRange is set, fetch articles
   useEffect(() => {
