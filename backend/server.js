@@ -26,10 +26,11 @@ async function fetchArticles(domain) {
    const testUrl = 'https://en.wikipedia.org/wiki/Main_Page';
   console.log(testUrl);
   const { data } = await axios.get(testUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-      }
-    });
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36',
+    'Accept-Language': 'en-US,en;q=0.9'
+  }
+});
   const $ = cheerio.load(data);
   const articles = [];
 
