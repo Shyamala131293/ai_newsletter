@@ -17,35 +17,20 @@ const openai = new OpenAIApi(configuration);
 // SendGrid setup
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-/* =======================
-   AI Fetch and Process API
-======================= */
+// Your API key for newsapi
+const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
 
-async function fetchArticles(domain) {
-  const url = `${domain}`; // Fixed: Use backticks for template literal
-   const testUrl = 'https://github.com/trending';
-  console.log(testUrl);
-  const { data } = await axios.get(testUrl, {
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36',
-    'Accept-Language': 'en-US,en;q=0.9'
-  }
-});
-  const $ = cheerio.load(html);
-   console.log($)
-  const articles = [];
+// New fetchArticles function
+async function fetchArticles(start, end) {
+  const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&date=2026-08-23`;
+  const response = await axios.get(url);
+  const fetchedArticles = response.data.articles.results;
 
-  $('h2, a').each((i, elem) => {
-    const text = $(elem).text();
-    const link = $(elem).attr('href');
-    if (text && link && link.startsWith('http')) {
-        articles.push({ title: text, url: link });
-      
-    }
-  });
-  return articles.slice(0, 5);
+ 
+  return fetchedArticles;
 }
 
+// Function to summarize text using OpenAI
 async function summarizeText(text) {
   const prompt = `Summarize this article:\n\n${text}`;
   const response = await openai.createCompletion({
@@ -56,50 +41,49 @@ async function summarizeText(text) {
   return response.data.choices[0].text.trim();
 }
 
-// Route for AI fetch and process
+/* =======================
+   API route: fetch and process articles
+======================= */
 app.post('/api/fetch-and-process', async (req, res) => {
-  const { domains } = req.body; // Get domains from request body
-  console.log(domains);
-  if (!Array.isArray(domains)) {
-    return res.status(400).json({ error: 'domains should be an array' });
+  const { startDate, endDate } = req.body; // Expect date range
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: 'startDate and endDate are required' });
   }
 
-  const allArticles = [];
+  try {
+    const articles = await fetchArticles(startDate, endDate);
+    const allArticles = [];
 
-  for (const domain of domains) {
-    try {
-      const articles = await fetchArticles(domain);
-      for (const article of articles) {
-        try {
-          const { data } = await axios.get(article.url);
-          const $ = cheerio.load(data);
-          const paragraphs = $('p')
-            .map((i, el) => $(el).text())
-            .get()
-            .join(' ');
-          const summary = await summarizeText(paragraphs);
-          allArticles.push({
-            domain,
-            title: article.title,
-            url: article.url,
-            summary,
-          });
-        } catch (err) {
-          console.error(`Error processing article at ${article.url}:`, err.message);
-        }
+    for (const article of articles) {
+      try {
+        const { data } = await axios.get(article.url);
+        const $ = cheerio.load(data);
+         console.log($)
+        const paragraphs = $('p')
+          .map((i, el) => $(el).text())
+          .get()
+          .join(' ');
+        const summary = await summarizeText(paragraphs);
+        allArticles.push({
+          title: article.title,
+          url: article.url,
+          summary,
+        });
+      } catch (err) {
+        console.error(`Error processing article at ${article.url}:`, err.message);
       }
-    } catch (err) {
-      console.error(`Error processing domain ${domain}:`, err.message);
     }
-  }
 
-  res.json({ articles: allArticles });
+    res.json({ articles: allArticles });
+  } catch (err) {
+    console.error('Error fetching articles:', err.message);
+    res.status(500).json({ error: 'Failed to fetch articles' });
+  }
 });
 
 /* =======================
-   Email Sending API
+   API route: send email
 ======================= */
-
 app.post('/send-email', async (req, res) => {
   const { recipientEmails, pdfBase64 } = req.body;
 
@@ -142,7 +126,6 @@ app.post('/send-email', async (req, res) => {
 /* =======================
    Server setup
 ======================= */
-
 const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
