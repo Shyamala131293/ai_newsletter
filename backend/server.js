@@ -51,7 +51,7 @@ async function summarizeText(text) {
 
 // Route for AI fetch and process
 app.post('/api/fetch-and-process', async (req, res) => {
-  const { domains } = ["https://dzone.com/​", "https://sdtimes.com/​", "https://github.com/trending"];
+  const { domains } = req.body; // Get domains from request body
   if (!Array.isArray(domains)) {
     return res.status(400).json({ error: 'domains should be an array' });
   }
@@ -135,4 +135,4 @@ app.post('/send-email', async (req, res) => {
 const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});​
+});
