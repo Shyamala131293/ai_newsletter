@@ -35,7 +35,7 @@ const App = () => {
   setLoading(true);
   try {
     // Call your backend agent
-    const data = await fetchArticles(['https://dzone.com/​']); // pass your domains here
+    const data = await fetchArticles(['https://en.wikipedia.org/wiki/Main_Page​']); // pass your domains here
     setArticles(data);
   } catch (err) {
     console.error('Error fetching articles:', err);
