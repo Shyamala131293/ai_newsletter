@@ -25,6 +25,7 @@ async function fetchArticles(start, end) {
   const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&date=2026-08-23`;
   const response = await axios.get(url);
   const fetchedArticles = response.data.articles.results;
+  console.log(fetchedArticles)
 
  
   return fetchedArticles;
@@ -52,6 +53,7 @@ app.post('/api/fetch-and-process', async (req, res) => {
 
   try {
     const articles = await fetchArticles(startDate, endDate);
+    console.log(articles)
     const allArticles = [];
 
     for (const article of articles) {
