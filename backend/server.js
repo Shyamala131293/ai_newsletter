@@ -31,7 +31,7 @@ async function fetchArticles(domain) {
     'Accept-Language': 'en-US,en;q=0.9'
   }
 });
-  const $ = cheerio.load(data);
+  const $ = cheerio.load(html);
    console.log($)
   const articles = [];
 
