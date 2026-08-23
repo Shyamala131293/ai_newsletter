@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { agentFetchArticles  } from './agents'; // Your fetchArticles function
+import { fetchArticles  } from './agents'; // Your fetchArticles function
 import { runWorkflow } from './workflow'; // Your runWorkflow function
 
 // Utility to get last 4 Fridays and today
@@ -35,7 +35,7 @@ const App = () => {
   setLoading(true);
   try {
     // Call your backend agent
-    const data = await agentFetchArticles(['https://dzone.com/​']); // pass your domains here
+    const data = await fetchArticles(['https://dzone.com/​']); // pass your domains here
     setArticles(data);
   } catch (err) {
     console.error('Error fetching articles:', err);
