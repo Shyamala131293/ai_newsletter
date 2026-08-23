@@ -24,7 +24,11 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 async function fetchArticles(domain) {
   const url = `${domain}`; // Fixed: Use backticks for template literal
   console.log(url);
-  const { data } = await axios.get(url);
+  const { data } = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+      }
+    });
   const $ = cheerio.load(data);
   const articles = [];
 
