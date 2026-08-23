@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
 
-const BACKEND_API_URL = 'https://your-backend-domain.com/api/fetch-and-process';
+const BACKEND_API_URL = 'https://ai-newsletter-2.onrender.com/api/fetch-and-process';
 
 export async function agentFetchArticles(domains) {
   const response = await axios.post(BACKEND_API_URL, {
