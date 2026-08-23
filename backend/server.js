@@ -22,8 +22,8 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 ======================= */
 
 async function fetchArticles(domain) {
-  const url = ${domain};
-   console.log(url)
+  const url = `${domain}`; // Fixed: Use backticks for template literal
+  console.log(url);
   const { data } = await axios.get(url);
   const $ = cheerio.load(data);
   const articles = [];
@@ -53,7 +53,7 @@ async function summarizeText(text) {
 // Route for AI fetch and process
 app.post('/api/fetch-and-process', async (req, res) => {
   const { domains } = req.body; // Get domains from request body
-   console.log(domains)
+  console.log(domains);
   if (!Array.isArray(domains)) {
     return res.status(400).json({ error: 'domains should be an array' });
   }
@@ -67,7 +67,10 @@ app.post('/api/fetch-and-process', async (req, res) => {
         try {
           const { data } = await axios.get(article.url);
           const $ = cheerio.load(data);
-          const paragraphs = $('p').map((i, el) => $(el).text()).get().join(' ');
+          const paragraphs = $('p')
+            .map((i, el) => $(el).text())
+            .get()
+            .join(' ');
           const summary = await summarizeText(paragraphs);
           allArticles.push({
             domain,
