@@ -56,14 +56,14 @@ app.post('/api/fetch-and-process', async (req, res) => {
 
     for (const article of articles) {
       try {
-        const { data } = await axios.get(article.url);
-        const $ = cheerio.load(data);
-         console.log($)
-        const paragraphs = $('p')
-          .map((i, el) => $(el).text())
-          .get()
-          .join(' ');
-        const summary = await summarizeText(paragraphs);
+       // const { data } = await axios.get(article.url);
+       // const $ = cheerio.load(data);
+       //  console.log($)
+       // const paragraphs = $('p')
+       //   .map((i, el) => $(el).text())
+       //   .get()
+       //   .join(' '); //
+        const summary = await summarizeText(article.body);
         allArticles.push({
           title: article.title,
           url: article.url,
