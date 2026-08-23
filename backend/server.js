@@ -40,7 +40,7 @@ async function fetchArticles(domain) {
     const link = $(elem).attr('href');
     if (text && link && link.startsWith('http')) {
         articles.push({ title: text, url: link });
-      }
+      
     }
   });
   return articles.slice(0, 5);
