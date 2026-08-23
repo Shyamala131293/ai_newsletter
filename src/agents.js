@@ -9,7 +9,8 @@ const BACKEND_API_URL = 'https://ai-newsletter-2.onrender.com/api/fetch-and-proc
 
 export async function fetchArticles(start, end) {
   const response = await axios.post(BACKEND_API_URL, {
-    start, end // array of domains you want to fetch articles from
+    startDate: start,
+    endDate: end
   });
   console.log(response.data)
   return response.data.articles; // assuming your backend responds with { articles: [...] }
