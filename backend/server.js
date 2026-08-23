@@ -23,7 +23,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function fetchArticles(domain) {
   const url = `${domain}`; // Fixed: Use backticks for template literal
-   const testUrl = 'https://dzone.com/';
+   const testUrl = 'https://github.com/trending';
   console.log(testUrl);
   const { data } = await axios.get(testUrl, {
   headers: {
