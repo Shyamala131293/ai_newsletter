@@ -22,7 +22,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 ======================= */
 
 async function fetchArticles(domain) {
-  const url = `https://${domain}`;
+  const url = ${domain};
    console.log(url)
   const { data } = await axios.get(url);
   const $ = cheerio.load(data);
