@@ -5,26 +5,13 @@ import axios from 'axios';
 
 const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
 
-export async function fetchArticles(start, end) {
-const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&dateEnd=${end}`;
-  const response = await axios.get(url);
-  const fetchedArticles = response.data.articles.results;
+const BACKEND_API_URL = 'https://your-backend-domain.com/api/fetch-and-process';
 
-  const seenWords = new Set();
-  const uniqueArticles = [];
-
-  for (const article of fetchedArticles) {
-    if (!/\bAI\b/i.test(article.title)) continue;
-
-    const titleWords = article.title.split(/\s+/).slice(0, 5).join(' ').toLowerCase();
-    if (!seenWords.has(titleWords)) {
-      seenWords.add(titleWords);
-      uniqueArticles.push(article);
-    }
-    if (uniqueArticles.length === 10) break;
-  }
-  return uniqueArticles;
-
+export async function agentFetchArticles(domains) {
+  const response = await axios.post(BACKEND_API_URL, {
+    domains, // array of domains you want to fetch articles from
+  });
+  return response.data.articles; // assuming your backend responds with { articles: [...] }
 }
 
 export async function generatePdfAndSend({ articles, recipientEmails, emailEndpoint }) {
