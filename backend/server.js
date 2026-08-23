@@ -23,8 +23,9 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function fetchArticles(domain) {
   const url = `${domain}`; // Fixed: Use backticks for template literal
-  console.log(url);
-  const { data } = await axios.get(url, {
+   const testUrl = 'https://en.wikipedia.org/wiki/Main_Page';
+  console.log(testUrl);
+  const { data } = await axios.get(testUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
       }
@@ -35,7 +36,7 @@ async function fetchArticles(domain) {
   $('h2, a').each((i, elem) => {
     const text = $(elem).text();
     const link = $(elem).attr('href');
-    if (text && link && link.startsWith('http')) {
+    if (text && link && link.startsWith('https')) {
       if (text.toLowerCase().includes('ai')) {
         articles.push({ title: text, url: link });
       }
