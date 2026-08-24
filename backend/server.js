@@ -4,7 +4,7 @@ const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
 const { HfInference } = require('@huggingface/inference');
-const { pipeline } = require('transformers');
+const { pipeline } = require('@xenova/transformers');
 
 
 const app = express();
