@@ -13,6 +13,6 @@
       "cors": "^2.8.5",
     "openai": "^3.0.0",
     "cheerio": "^1.0.0-rc.12",
-         "@huggingface/inference": "^0.0.17"
+         "@huggingface/inference": "4.13.11"
     }
   }
