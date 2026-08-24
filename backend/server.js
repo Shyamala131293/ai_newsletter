@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const cheerio = require('cheerio');
 const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
 
@@ -20,14 +19,12 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // Your API key for newsapi
 const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
 
-// New fetchArticles function
+// Fetch articles from your newsapi
 async function fetchArticles(start, end) {
-  const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&date=2026-08-23`;
+  const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&date=${start}`;
   const response = await axios.get(url);
   const fetchedArticles = response.data.articles.results;
-  console.log(fetchedArticles)
-
- 
+  console.log(`Fetched ${fetchedArticles.length} articles`);
   return fetchedArticles;
 }
 
@@ -42,50 +39,48 @@ async function summarizeText(text) {
   return response.data.choices[0].text.trim();
 }
 
-/* =======================
-   API route: fetch and process articles
-======================= */
+// API route: fetch and process articles
 app.post('/api/fetch-and-process', async (req, res) => {
-  const { startDate, endDate } = req.body; // Expect date range
+  const { startDate, endDate } = req.body;
+
   if (!startDate || !endDate) {
     return res.status(400).json({ error: 'startDate and endDate are required' });
   }
 
   try {
     const articles = await fetchArticles(startDate, endDate);
-    console.log(articles)
-    const allArticles = [];
+    const processedArticles = [];
 
     for (const article of articles) {
       try {
-       // const { data } = await axios.get(article.url);
-       // const $ = cheerio.load(data);
-       //  console.log($)
-       // const paragraphs = $('p')
-       //   .map((i, el) => $(el).text())
-       //   .get()
-       //   .join(' '); //
-        const summary = await summarizeText(article.body);
-        allArticles.push({
+        // If your article object contains a 'body' or 'content' field, use it
+        // Otherwise, you might need to scrape the article URL or skip
+        const textToSummarize = article.body || article.content || '';
+
+        if (!textToSummarize) {
+          console.warn(`No content to summarize for article: ${article.title}`);
+          continue;
+        }
+
+        const summary = await summarizeText(textToSummarize);
+        processedArticles.push({
           title: article.title,
           url: article.url,
           summary,
         });
       } catch (err) {
-        console.error(`Error processing article at ${article.url}:`, err.message);
+        console.error(`Error processing article "${article.title}":`, err.message);
       }
     }
 
-    res.json({ articles: allArticles });
+    res.json({ articles: processedArticles });
   } catch (err) {
-    console.error('Error fetching articles:', err.message);
-    res.status(500).json({ error: 'Failed to fetch articles' });
+    console.error('Error fetching or processing articles:', err.message);
+    res.status(500).json({ error: 'Failed to fetch or process articles' });
   }
 });
 
-/* =======================
-   API route: send email
-======================= */
+// API route: send email with PDF attachment
 app.post('/send-email', async (req, res) => {
   const { recipientEmails, pdfBase64 } = req.body;
 
@@ -125,9 +120,7 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
-/* =======================
-   Server setup
-======================= */
+// Server setup
 const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
