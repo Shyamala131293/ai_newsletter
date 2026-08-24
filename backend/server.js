@@ -4,6 +4,7 @@ const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
 const { HfInference } = require('@huggingface/inference');
+const { pipeline } = require('transformers');
 
 
 const app = express();
@@ -35,13 +36,13 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   try {
- const response = await inference.textGeneration({
-    model: 'gpt-3',
-   task : 'text-generation',
-    inputs: `Summarize the following: ${text}`,
-    parameters: { max_length: 50 }
-   
-  });
+ const textGenerationPipeline = pipeline('text-generation', { model: 'openai/gpt-oss-120b' });
+
+// Then, inside your function, use:
+const response = await textGenerationPipeline(`Summarize the following: ${text}`, { max_length: 50 });
+
+// The response will be an array of generated texts
+const generatedText = response[0].generated_text;
   return response.generated_text;
 } catch (error) {
   console.error('OpenAI API error:', error.response ? error.response.data : error.message);
