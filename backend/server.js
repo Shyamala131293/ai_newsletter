@@ -3,7 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
-const { HfApi } = require('@huggingface/hub');
+const { HfInference } = require('@huggingface/inference');
 
 
 const app = express();
@@ -21,6 +21,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // Your API key for newsapi
 const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
 const hfToken = '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';
+const inference = new HfInference('hfToken');
 
 // Fetch articles from your newsapi
 async function fetchArticles(start, end) {
@@ -34,14 +35,12 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   try {
-  const client = new HfApi({ token: hfToken });
-  const hfModelName = 't5-small';
-  const model = await client.model.load(hfModelName);
-  const prompts = articles.map(article => `Given the article content '${text}', summarize the article in 2-3 sentences.`);
-  const inputs = prompts.map(prompt => ({ input: prompt }));
-  const outputs = await model.generate(inputs);
-  const summaries = outputs.map(output => output["generated_text"]);
-  return summaries;
+ const response = await inference.textGeneration({
+    model: 't5-small',
+    inputs: `Summarize the following: ${text}`,
+    parameters: { max_length: 50 }
+  });
+  return response.generated_text;
 } catch (error) {
   console.error('OpenAI API error:', error.response ? error.response.data : error.message);
   throw error; // or handle accordingly
