@@ -31,13 +31,16 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   try {
-  const prompt = `Summarize this article:\n\n${text}`;
-  const response = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt,
-    max_tokens: 150,
-  });
-  console.log(response);
+  const response = await openai.createChatCompletion({
+  model: 'gpt-3.5-turbo',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: `Summarize this article:\n\n${text}` },
+  ],
+  max_tokens: 150,
+});
+console.log(response.data.choices[0].message.content.trim());
+  
   return response.data.choices[0].text.trim();
 } catch (error) {
   console.error('OpenAI API error:', error.response ? error.response.data : error.message);
