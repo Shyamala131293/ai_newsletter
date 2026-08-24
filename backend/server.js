@@ -31,11 +31,12 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   const prompt = `Summarize this article:\n\n${text}`;
- // const response = await openai.createCompletion({
-   // model: 'text-davinci-003',
-    //prompt,
-    //max_tokens: 150,
-  //});
+ const response = await openai.createCompletion({
+    model: 'text-davinci-003',
+    prompt,
+    max_tokens: 150,
+  });
+  console.log(response)
   //return response.data.choices[0].text.trim();
   return text;
 }
@@ -70,7 +71,7 @@ app.post('/api/fetch-and-process', async (req, res) => {
           body: article.body,
         });
       } catch (err) {
-        console.error(`Error processing article "${article.title}":`, err.message);
+       // console.error(`Error processing article "${article.title}":`, err.message);
       }
     }
 
