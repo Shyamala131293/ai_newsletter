@@ -3,6 +3,8 @@ const cors = require('cors');
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
+const { Client } = require('@huggingface/hub');
+
 
 const app = express();
 app.use(cors());
@@ -18,6 +20,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Your API key for newsapi
 const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
+const hfToken = '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';
 
 // Fetch articles from your newsapi
 async function fetchArticles(start, end) {
@@ -31,17 +34,14 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   try {
-  const response = await openai.createChatCompletion({
-  model: 'gpt-3.5-turbo',
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant.' },
-    { role: 'user', content: `Summarize this article:\n\n${text}` },
-  ],
-  max_tokens: 150,
-});
-console.log(response.data.choices[0].message.content.trim());
-  
-  return response.data.choices[0].text.trim();
+  const client = new Client({ token: hfToken });
+  const hfModelName = 't5-small';
+  const model = await client.model.load(hfModelName);
+  const prompts = articles.map(article => `Given the article content '${text}', summarize the article in 2-3 sentences.`);
+  const inputs = prompts.map(prompt => ({ input: prompt }));
+  const outputs = await model.generate(inputs);
+  const summaries = outputs.map(output => output["generated_text"]);
+  return summaries;
 } catch (error) {
   console.error('OpenAI API error:', error.response ? error.response.data : error.message);
   throw error; // or handle accordingly
