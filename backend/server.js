@@ -30,15 +30,20 @@ async function fetchArticles(start, end) {
 
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
+  try {
   const prompt = `Summarize this article:\n\n${text}`;
- const response = await openai.createCompletion({
+  const response = await openai.createCompletion({
     model: 'text-davinci-003',
     prompt,
     max_tokens: 150,
   });
-  console.log(response)
-  //return response.data.choices[0].text.trim();
-  return text;
+  console.log(response);
+  return response.data.choices[0].text.trim();
+} catch (error) {
+  console.error('OpenAI API error:', error.response ? error.response.data : error.message);
+  throw error; // or handle accordingly
+}
+  
 }
 
 // API route: fetch and process articles
