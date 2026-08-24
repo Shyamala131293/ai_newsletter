@@ -36,7 +36,7 @@ async function fetchArticles(start, end) {
 async function summarizeText(text) {
   try {
  const response = await inference.textGeneration({
-    model: 'gpt2',
+    model: 'gpt-3',
    task : 'text-generation',
     inputs: `Summarize the following: ${text}`,
     parameters: { max_length: 50 }
