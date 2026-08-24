@@ -3,7 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
-const { Client } = require('@huggingface/hub');
+const { HfApi } = require('@huggingface/hub');
 
 
 const app = express();
@@ -34,7 +34,7 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   try {
-  const client = new Client({ token: hfToken });
+  const client = new HfApi({ token: hfToken });
   const hfModelName = 't5-small';
   const model = await client.model.load(hfModelName);
   const prompts = articles.map(article => `Given the article content '${text}', summarize the article in 2-3 sentences.`);
