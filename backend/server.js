@@ -31,12 +31,13 @@ async function fetchArticles(start, end) {
 // Function to summarize text using OpenAI
 async function summarizeText(text) {
   const prompt = `Summarize this article:\n\n${text}`;
-  const response = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt,
-    max_tokens: 150,
-  });
-  return response.data.choices[0].text.trim();
+ // const response = await openai.createCompletion({
+   // model: 'text-davinci-003',
+    //prompt,
+    //max_tokens: 150,
+  //});
+  //return response.data.choices[0].text.trim();
+  return text;
 }
 
 // API route: fetch and process articles
@@ -55,7 +56,7 @@ app.post('/api/fetch-and-process', async (req, res) => {
       try {
         // If your article object contains a 'body' or 'content' field, use it
         // Otherwise, you might need to scrape the article URL or skip
-       // const textToSummarize = article.body || article.content || '';
+        const textToSummarize = article.body || article.content || '';
 
         if (!textToSummarize) {
           console.warn(`No content to summarize for article: ${article.title}`);
