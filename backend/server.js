@@ -36,9 +36,11 @@ async function fetchArticles(start, end) {
 async function summarizeText(text) {
   try {
  const response = await inference.textGeneration({
-    model: 't5-small',
+    model: 'gpt2',
+   task : 'text-generation',
     inputs: `Summarize the following: ${text}`,
     parameters: { max_length: 50 }
+   
   });
   return response.generated_text;
 } catch (error) {
