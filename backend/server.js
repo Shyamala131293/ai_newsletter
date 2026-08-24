@@ -55,7 +55,7 @@ app.post('/api/fetch-and-process', async (req, res) => {
       try {
         // If your article object contains a 'body' or 'content' field, use it
         // Otherwise, you might need to scrape the article URL or skip
-        const textToSummarize = article.body || article.content || '';
+       // const textToSummarize = article.body || article.content || '';
 
         if (!textToSummarize) {
           console.warn(`No content to summarize for article: ${article.title}`);
@@ -66,7 +66,7 @@ app.post('/api/fetch-and-process', async (req, res) => {
         processedArticles.push({
           title: article.title,
           url: article.url,
-          summary,
+          body: article.body,
         });
       } catch (err) {
         console.error(`Error processing article "${article.title}":`, err.message);
