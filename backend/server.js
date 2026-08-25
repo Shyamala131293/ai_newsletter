@@ -54,6 +54,15 @@ let summarizationPipeline;
   }
 })();
 
+// Add health check endpoint
+app.get('/api/health', (req, res) => {
+  if (summarizationPipeline) {
+    res.json({ status: 'ready' });
+  } else {
+    res.json({ status: 'loading' });
+  }
+});
+
 // Fetch articles from NewsAPI
 async function fetchArticles(start, end) {
   const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&date=${start}`;
@@ -69,8 +78,7 @@ async function summarizeText(text) {
     throw new Error('Summarization model not loaded yet.');
   }
   const response = await summarizationPipeline(text);
-  // response is an array of summaries
-  return response[0].summary; // or response[0].generated_text depending on model
+  return response[0].summary;
 }
 
 // Route: fetch and process articles
@@ -81,7 +89,6 @@ app.post('/api/fetch-and-process', async (req, res) => {
     return res.status(400).json({ error: 'startDate and endDate are required' });
   }
 
-  // Check if the model is loaded
   if (!summarizationPipeline) {
     return res.status(503).json({ error: 'Summarization model is not loaded yet. Please try again later.' });
   }
@@ -155,8 +162,8 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
-// Server setup
+// Start server
 const PORT = 4000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
