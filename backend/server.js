@@ -1,169 +1,213 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { Configuration, OpenAIApi } = require('openai');
 const sgMail = require('@sendgrid/mail');
-const { HfInference } = require('@huggingface/inference');
 const { pipeline } = require('@xenova/transformers');
 
 const app = express();
 app.use(express.json());
 
-const allowedOrigins = ['https://ai-newsletter-1-cwxb.onrender.com'];
+const allowedOrigins = [
+  'https://ai-newsletter-1-cwxb.onrender.com'
+];
 
-// CORS configuration
-app.use(cors({
-  origin: function (origin, callback) {
-    console.log('Origin:', origin);
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'],
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      console.log('Origin:', origin);
 
-// Handle all OPTIONS requests
-app.options('*', cors({ origin: allowedOrigins }));
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'OPTIONS']
+  })
+);
 
-// OpenAI setup
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const configuration = new Configuration({ apiKey: OPENAI_API_KEY });
-const openai = new OpenAIApi(configuration);
+app.options('*', cors());
 
-// SendGrid setup
+// SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// NewsAPI key
-const API_KEY = '2c487246-bfc3-4973-9803-ec814ce8a509';
+// NewsAPI.ai
+const API_KEY = "2c487246-bfc3-4973-9803-ec814ce8a509";
 
-// Hugging Face token
-const hfToken = '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';
-const inference = new HfInference('hfToken');
+// Global model
+let summarizer = null;
 
-// Initialize summarization pipeline once at startup
-let summarizationPipeline;
-
+// Load model once
 (async () => {
   try {
-    summarizationPipeline = await pipeline('text-generation', { model: 'facebook/bart-large-cnn' });
-    console.log('Summarization model loaded.');
+    console.log('Loading summarization model...');
+
+    summarizer = await pipeline(
+      'summarization',
+      'Xenova/distilbart-cnn-6-6'
+    );
+
+    console.log('✅ Summarization model loaded.');
   } catch (err) {
-    console.error('Error loading summarization model:', err);
+    console.error('❌ Error loading model:', err);
   }
 })();
 
-// Add health check endpoint
 app.get('/api/health', (req, res) => {
-  if (summarizationPipeline) {
-    res.json({ status: 'ready' });
-  } else {
-    res.json({ status: 'loading' });
-  }
+  res.json({
+    status: summarizer ? 'ready' : 'loading'
+  });
 });
 
-// Fetch articles from NewsAPI
-async function fetchArticles(start, end) {
-  const url = `https://newsapi.ai/api/v1/article/getArticles?apiKey=${API_KEY}&keyword=ai+technology&isDuplicate=false&lang=eng&date=${start}`;
+// Fetch articles
+async function fetchArticles(startDate) {
+  const url =
+    `https://newsapi.ai/api/v1/article/getArticles` +
+    `?apiKey=${API_KEY}` +
+    `&keyword=ai+technology` +
+    `&lang=eng` +
+    `&isDuplicate=false` +
+    `&date=${startDate}`;
+
   const response = await axios.get(url);
-  const fetchedArticles = response.data.articles.results;
-  console.log(`Fetched ${fetchedArticles.length} articles`);
-  return fetchedArticles;
+
+  const articles =
+    response?.data?.articles?.results || [];
+
+  console.log(`Fetched ${articles.length} articles`);
+
+  return articles;
 }
 
-// Summarize text using the loaded model
+// Summarize text
 async function summarizeText(text) {
-  if (!summarizationPipeline) {
-    throw new Error('Summarization model not loaded yet.');
+  if (!summarizer) {
+    throw new Error('Model not loaded');
   }
-  const response = await summarizationPipeline(text);
-  return response[0].summary;
+
+  const result = await summarizer(text, {
+    max_new_tokens: 120,
+    min_length: 30
+  });
+
+  return result[0]?.summary_text || '';
 }
 
-// Route: fetch and process articles
+// Process articles
 app.post('/api/fetch-and-process', async (req, res) => {
-  const { startDate, endDate } = req.body;
-
-  if (!startDate || !endDate) {
-    return res.status(400).json({ error: 'startDate and endDate are required' });
-  }
-
-  if (!summarizationPipeline) {
-    return res.status(503).json({ error: 'Summarization model is not loaded yet. Please try again later.' });
-  }
-
   try {
-    const articles = await fetchArticles(startDate, endDate);
+    const { startDate, endDate } = req.body;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        error: 'startDate and endDate are required'
+      });
+    }
+
+    if (!summarizer) {
+      return res.status(503).json({
+        error: 'Model still loading'
+      });
+    }
+
+    const articles = await fetchArticles(startDate);
+
     const processedArticles = [];
 
     for (const article of articles) {
       try {
-        const textToSummarize = article.body || article.content || '';
-        if (!textToSummarize) {
-          console.warn(`No content to summarize for article: ${article.title}`);
+        const text =
+          article.body ||
+          article.content ||
+          article.title;
+
+        if (!text) {
           continue;
         }
-        const summary = await summarizeText(textToSummarize);
+
+        const summary = await summarizeText(
+          text.length > 4000
+            ? text.substring(0, 4000)
+            : text
+        );
+
         processedArticles.push({
           title: article.title,
           url: article.url,
-          summary: summary,
+          summary
         });
       } catch (err) {
-        console.error(`Error processing article "${article.title}":`, err.message);
+        console.error(
+          `Error processing "${article.title}"`,
+          err.message
+        );
       }
     }
 
-    res.json({ articles: processedArticles });
+    res.json({
+      articles: processedArticles
+    });
   } catch (err) {
-    console.error('Error fetching or processing articles:', err.message);
-    res.status(500).json({ error: 'Failed to fetch or process articles' });
+    console.error(err);
+
+    res.status(500).json({
+      error: 'Failed to process articles'
+    });
   }
 });
 
-// Route: send email with PDF attachment
+// Email
 app.post('/send-email', async (req, res) => {
-  const { recipientEmails, pdfBase64 } = req.body;
-
-  if (
-    !recipientEmails ||
-    !Array.isArray(recipientEmails) ||
-    recipientEmails.length === 0
-  ) {
-    return res.status(400).json({ error: 'recipientEmails array is required' });
-  }
-
-  if (!pdfBase64 || typeof pdfBase64 !== 'string') {
-    return res.status(400).json({ error: 'pdfBase64 string is required' });
-  }
-
-  const msg = {
-    from: 'AI newsletter <ainewsletter6@gmail.com>',
-    to: recipientEmails,
-    subject: 'AI newsletter',
-    html: '<p>Please find the attached newsletter.</p>',
-    attachments: [
-      {
-        content: pdfBase64,
-        filename: 'newsletter.pdf',
-        type: 'application/pdf',
-        disposition: 'attachment',
-      },
-    ],
-  };
-
   try {
+    const { recipientEmails, pdfBase64 } = req.body;
+
+    if (
+      !recipientEmails ||
+      !Array.isArray(recipientEmails) ||
+      recipientEmails.length === 0
+    ) {
+      return res.status(400).json({
+        error: 'recipientEmails required'
+      });
+    }
+
+    if (!pdfBase64) {
+      return res.status(400).json({
+        error: 'pdfBase64 required'
+      });
+    }
+
+    const msg = {
+      from: process.env.SENDGRID_FROM_EMAIL,
+      to: recipientEmails,
+      subject: 'AI Newsletter',
+      html: '<p>Please find the attached newsletter.</p>',
+      attachments: [
+        {
+          content: pdfBase64,
+          filename: 'newsletter.pdf',
+          type: 'application/pdf',
+          disposition: 'attachment'
+        }
+      ]
+    };
+
     await sgMail.send(msg);
-    res.json({ message: 'Emails sent successfully' });
-  } catch (error) {
-    console.error('Error sending email:', error.response ? error.response.body : error);
-    res.status(500).json({ error: 'Failed to send email' });
+
+    res.json({
+      message: 'Emails sent successfully'
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      error: 'Failed to send email'
+    });
   }
 });
 
-// Start server
-const PORT = 4000;
+const PORT = || 4000;
+
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
