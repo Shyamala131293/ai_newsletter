@@ -47,8 +47,8 @@ let summarizationPipeline;
 
 (async () => {
   try {
-    summarizationPipeline = await pipeline('text-generation', { model: 'openai/gpt-oss-120b' });;
-        console.log('Summarization model loaded.');
+    summarizationPipeline = await pipeline('text-generation', { model: 'openai/gpt-oss-120b' });
+    console.log('Summarization model loaded.');
   } catch (err) {
     console.error('Error loading summarization model:', err);
   }
@@ -79,6 +79,11 @@ app.post('/api/fetch-and-process', async (req, res) => {
 
   if (!startDate || !endDate) {
     return res.status(400).json({ error: 'startDate and endDate are required' });
+  }
+
+  // Check if the model is loaded
+  if (!summarizationPipeline) {
+    return res.status(503).json({ error: 'Summarization model is not loaded yet. Please try again later.' });
   }
 
   try {
