@@ -8,7 +8,8 @@ const { pipeline } = require('@xenova/transformers');
 
 
 const app = express();
-const allowedOrigins = ['https://ai-newsletter-1-cwxb.onrender.com'];
+const allowedOrigins = ['https://ai-newsletter-1-cwxb.onrender.com/'];
+
 
 app.use(cors({
   origin: function (origin, callback) {
