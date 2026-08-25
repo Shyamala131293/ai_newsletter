@@ -8,8 +8,7 @@ const { pipeline } = require('@xenova/transformers');
 
 
 const app = express();
-const allowedOrigins = ['https://ai-newsletter-1-cwxb.onrender.com/'];
-
+const allowedOrigins = ['https://ai-newsletter-1-cwxb.onrender.com'];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -19,13 +18,11 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  // Uncomment if you need to handle cookies/auth headers
-  // credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
 }));
-app.use(express.json({ limit: '10mb' }));
 
-// Handle preflight requests for your specific route
-app.options('/api/fetch-and-process', cors({ origin: allowedOrigins }));
+// Handle all OPTIONS requests
+app.options('*', cors({ origin: allowedOrigins }));
 
 // OpenAI setup
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
