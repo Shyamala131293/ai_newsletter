@@ -23,6 +23,9 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
+// Handle preflight requests for your specific route
+app.options('/api/fetch-and-process', cors({ origin: allowedOrigins }));
+
 // OpenAI setup
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const configuration = new Configuration({ apiKey: OPENAI_API_KEY });
