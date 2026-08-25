@@ -28,7 +28,7 @@ app.use(
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Hugging Face
-const hf = new HfInference("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");
+const hf = new HfInference(process.env.hf_key);
 
 // NewsAPI.ai
 const NEWS_API_KEY =
