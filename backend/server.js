@@ -47,7 +47,7 @@ let summarizationPipeline;
 
 (async () => {
   try {
-    summarizationPipeline = await pipeline('text-generation', { model: 'openai/gpt-oss-120b' });
+    summarizationPipeline = await pipeline('text-generation', { model: 'facebook/bart-large-cnn' });
     console.log('Summarization model loaded.');
   } catch (err) {
     console.error('Error loading summarization model:', err);
