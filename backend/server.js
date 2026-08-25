@@ -71,12 +71,12 @@ async function summarizeText(text) {
       text.length > 1000
         ? text.substring(0, 1000)
         : text;
-
+  console.log(truncated)
     const result = await hf.summarization({
       model: 'facebook/bart-large-cnn',
       inputs: truncated
     });
-
+    
     return result.summary_text || '';
   } catch (err) {
     console.error('Summary Error:', err.message);
