@@ -102,7 +102,7 @@ const App = () => {
   return (
     <div style={{ padding: '20px' }}>
       {/* Header */}
-      <div style={{ backgroundColor: '#008080', color: 'white', padding: '20px', textAlign: 'center' }}>
+      <div style={{ backgroundColor: '#008080', color: 'white, textAlign: 'center' }}>
         <h2 style={{ margin: 0 }}>Top 10 AI Articles</h2>
       </div>
 
